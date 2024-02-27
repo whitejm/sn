@@ -3,6 +3,7 @@ import 'package:pocketbase/pocketbase.dart';
 import 'package:provider/provider.dart';
 import 'package:sn/auth_gaurd.dart';
 import 'package:sn/dashboard.dart';
+import 'package:sn/notebook.dart';
 import 'package:sn/pocketbase_auth.dart';
 import 'package:sn/pocketbase_library.dart';
 

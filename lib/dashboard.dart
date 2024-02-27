@@ -1,51 +1,136 @@
 import 'package:flutter/material.dart';
+import 'package:pocketbase/pocketbase.dart';
 import 'package:provider/provider.dart';
+import 'package:sn/notebook.dart';
 import 'package:sn/pocketbase_auth.dart';
 import 'package:sn/pocketbase_library.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
+  @override
+  _DashboardPageState createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  bool _showModal = false;
+  final _notebookNameController = TextEditingController();
+
+  @override
+  void dispose() {
+    _notebookNameController.dispose();
+    super.dispose();
+  }
+
+  void _handleAddNotebook() {
+    setState(() {
+      _showModal = true; // Show the modal
+    });
+  }
+
+  void _createNotebook(PocketBaseLibraryNotifier library, String userid) async {
+    final notebookName = _notebookNameController.text;
+    await library.addNotebook(notebookName, userid);
+    library.loadNotebooks(); // Update notebook list
+
+    // Close modal and clear the field
+    setState(() {
+      _showModal = false;
+    });
+    _notebookNameController.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<PocketBaseLibraryNotifier>(
+    return Consumer<PocketBaseAuthNotifier>(builder: (context, auth, child) {
+      return Consumer<PocketBaseLibraryNotifier>(
         builder: (context, library, child) {
-      if (library.notebooks.isEmpty) {
-        library.loadNotebooks();
-      }
-      return Scaffold(
-          appBar: AppBar(
-            title: Text('Dashboard'),
-          ),
-          body: Center(
-            child: Column(children: [
-              Expanded(
-                child: ListView.builder(
-                  itemCount: library.notebooks.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      child: Text(
-                        library.notebooks[index].getStringValue('name'),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    );
-                  },
+          if (library.notebooks.isEmpty) {
+            library.loadNotebooks();
+          }
+
+          List<RecordModel> sortedNotebooks = [
+            ...library.notebooks
+          ]; // Create a copy
+          sortedNotebooks.sort((a, b) => a
+              .getStringValue('name')
+              .toLowerCase()
+              .compareTo(b.getStringValue('name').toLowerCase()));
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Dashboard'),
+            ),
+            body: Center(
+                child: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    shrinkWrap: true, // Allow the list to shrink in height
+                    itemCount: library.notebooks.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        key: ValueKey(
+                            sortedNotebooks[index].getStringValue('id')),
+                        title: Text(
+                          sortedNotebooks[index].getStringValue('name'),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => NotebookPage(
+                                  notebook_id: sortedNotebooks[index].id),
+                            ),
+                          );
+                        },
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(
+                              color: Color.fromARGB(255, 243, 246, 249),
+                              width: 2.0),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-              ElevatedButton(
-                  onPressed: () async {
-                    await library.addNotebook("NOTEBOOK NAME");
-                    library.loadNotebooks();
-                  },
-                  child: Text("Add Notebook")),
-              Consumer<PocketBaseAuthNotifier>(builder: (context, auth, child) {
-                return ElevatedButton(
+                ElevatedButton(
+                    onPressed: _handleAddNotebook, child: Text("Add Notebook")),
+                ElevatedButton(
                   onPressed: () async {
                     await auth.signOut();
                   },
                   child: Text("Logout"),
-                );
-              }),
-            ]),
-          ));
+                )
+              ],
+            )),
+
+            // The Modal
+            bottomSheet: _showModal
+                ? Padding(
+                    padding: MediaQuery.of(context).viewInsets,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: TextField(
+                            controller: _notebookNameController,
+                            decoration: InputDecoration(
+                                hintText: 'Enter notebook name'),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () =>
+                              _createNotebook(library, auth.userid),
+                          child: Text('Create Notebook'),
+                        ),
+                      ],
+                    ),
+                  )
+                : null, // Hide the modal when not visible
+          );
+        },
+      );
     });
   }
 }

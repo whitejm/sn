@@ -35,12 +35,14 @@ class PocketBaseLibraryNotifier extends ChangeNotifier {
   }
 
   // add notebook
-  Future<void> addNotebook(String name) async {
+  Future<void> addNotebook(String name, String userid) async {
     _isLoading = true;
     notifyListeners();
-    print('attempting to add notebook');
+    print('attempting to add notebook ${name} ${userid}');
     try {
-      await pb.collection('notebooks').create(body: {'name': name});
+      await pb
+          .collection('notebooks')
+          .create(body: {'name': name, 'userid': userid});
     } catch (error) {
       _errorOccurred = true;
       _errorMessage = error.toString();
@@ -50,6 +52,25 @@ class PocketBaseLibraryNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
-  // rename notebook
+
+  // update notebook
+  Future<void> updateNotebook(
+      String notebookId, String name, String content) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await pb
+          .collection('notebooks')
+          .update(notebookId, body: {'name': name, 'content': content});
+      await loadNotebooks();
+    } catch (error) {
+      _errorOccurred = true;
+      _errorMessage = error.toString();
+      notifyListeners();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
   // delete notebook
 }
