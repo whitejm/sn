@@ -47,9 +47,7 @@ class _DashboardPageState extends State<DashboardPage> {
             library.loadNotebooks();
           }
 
-          List<RecordModel> sortedNotebooks = [
-            ...library.notebooks
-          ]; // Create a copy
+          List<RecordModel> sortedNotebooks = library.notebooks.values.toList();
           sortedNotebooks.sort((a, b) => a
               .getStringValue('name')
               .toLowerCase()
@@ -79,7 +77,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => NotebookPage(
-                                  notebook_id: sortedNotebooks[index].id),
+                                  notebookId: sortedNotebooks[index].id),
                             ),
                           );
                         },

@@ -59,6 +59,39 @@ class _NotebookEditPageState extends State<NotebookEditPage> {
     }
   }
 
+  void _showDeleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Notebook?'),
+          content: const Text('Are you sure you want to delete this notebook?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), // Cancel
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context); // Close the dialog
+                final library = Provider.of<PocketBaseLibraryNotifier>(context,
+                    listen: false);
+
+                await library.deleteNotebook(widget.notebookId);
+
+                // Assuming successful deletion, navigate back:
+                if (!library.errorOccurred) {
+                  Navigator.popAndPushNamed(context, '/');
+                }
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<PocketBaseLibraryNotifier>(
@@ -67,6 +100,10 @@ class _NotebookEditPageState extends State<NotebookEditPage> {
           appBar: AppBar(
             title: const Text('Edit Notebook'),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => _showDeleteDialog(context),
+              ),
               IconButton(
                 onPressed: () async {
                   await library.updateNotebook(widget.notebookId,

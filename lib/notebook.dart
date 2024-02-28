@@ -6,28 +6,18 @@ import 'package:sn/pocketbase_library.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 class NotebookPage extends StatelessWidget {
-  final String notebook_id;
+  final String notebookId;
 
-  const NotebookPage({super.key, required this.notebook_id});
+  const NotebookPage({super.key, required this.notebookId});
 
   @override
   Widget build(BuildContext context) {
     return Consumer<PocketBaseLibraryNotifier>(
         builder: (context, library, child) {
-      print("test");
-      print(notebook_id);
-      // Find the notebook
-      RecordModel? notebook;
-      for (RecordModel record in library.notebooks) {
-        if (record.id == notebook_id) {
-          notebook = record;
-          break;
-        }
-      }
-
       return Scaffold(
         appBar: AppBar(
-          title: Text(notebook?.getDataValue('name') ?? 'Notebook'),
+          title: Text(library.notebooks[notebookId]?.getDataValue('name') ??
+              'Notebook'),
           actions: [
             IconButton(
               icon: const Icon(Icons.edit),
@@ -36,16 +26,17 @@ class NotebookPage extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        NotebookEditPage(notebookId: notebook_id),
+                        NotebookEditPage(notebookId: notebookId),
                   ),
                 );
               },
             ),
           ],
         ),
-        body: notebook?.getDataValue('content') != null &&
-                notebook?.getDataValue('content') != ""
-            ? Markdown(data: notebook!.getDataValue('content'))
+        body: library.notebooks[notebookId]?.getDataValue('content') != null &&
+                library.notebooks[notebookId]?.getDataValue('content') != ""
+            ? Markdown(
+                data: library.notebooks[notebookId]!.getDataValue('content'))
             : const Center(
                 child: Text('Notebook is empty'),
               ),
