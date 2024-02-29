@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pocketbase/pocketbase.dart';
 import 'package:provider/provider.dart';
 import 'package:sn/notebook_edit.dart';
 import 'package:sn/pocketbase_library.dart';
@@ -16,8 +15,7 @@ class NotebookPage extends StatelessWidget {
         builder: (context, library, child) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(library.notebooks[notebookId]?.getDataValue('name') ??
-              'Notebook'),
+          title: Text(library.notebooks[notebookId]?.name ?? 'Notebook'),
           actions: [
             IconButton(
               icon: const Icon(Icons.edit),
@@ -33,10 +31,9 @@ class NotebookPage extends StatelessWidget {
             ),
           ],
         ),
-        body: library.notebooks[notebookId]?.getDataValue('content') != null &&
-                library.notebooks[notebookId]?.getDataValue('content') != ""
-            ? Markdown(
-                data: library.notebooks[notebookId]!.getDataValue('content'))
+        body: library.notebooks[notebookId]?.content != null &&
+                library.notebooks[notebookId]?.content != ""
+            ? Markdown(data: library.notebooks[notebookId]!.content)
             : const Center(
                 child: Text('Notebook is empty'),
               ),

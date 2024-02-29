@@ -7,14 +7,14 @@ class PocketBaseAuthNotifier extends ChangeNotifier {
   bool _isLoggedIn = false;
   bool _errorOccurred = false;
   String _errorMessage = "";
-  String _userid = "";
+  String _userId = "";
 
   // Getters
   bool get isLoading => _isLoading;
   bool get errorOccurred => _errorOccurred;
   String get errorMessage => _errorMessage;
   bool get isLoggedIn => _isLoggedIn;
-  String get userid => _userid;
+  String get userId => _userId;
 
   // Constructor
   PocketBaseAuthNotifier(this.pb);
@@ -31,7 +31,7 @@ class PocketBaseAuthNotifier extends ChangeNotifier {
       notifyListeners();
       print('logged in');
       _isLoggedIn = true;
-      _userid = await pb.authStore.model?.id;
+      _userId = await pb.authStore.model?.id;
     } catch (error) {
       _errorOccurred = true;
       _errorMessage = error.toString();

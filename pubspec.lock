@@ -148,7 +148,7 @@ packages:
     source: hosted
     version: "2.1.1"
   markdown:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: markdown
       sha256: "1b134d9f8ff2da15cb298efe6cd8b7d2a78958c1b00384ebcbdf13fe340a6c90"

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pocketbase/pocketbase.dart';
 import 'package:provider/provider.dart';
 import 'package:sn/notebook.dart';
 import 'package:sn/pocketbase_auth.dart';
@@ -26,10 +25,9 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
-  void _createNotebook(PocketBaseLibraryNotifier library, String userid) async {
+  void _createNotebook(PocketBaseLibraryNotifier library, String userId) async {
     final notebookName = _notebookNameController.text;
-    await library.addNotebook(notebookName, userid);
-    library.loadNotebooks(); // Update notebook list
+    await library.addNotebook(notebookName);
 
     // Close modal and clear the field
     setState(() {
@@ -44,14 +42,8 @@ class _DashboardPageState extends State<DashboardPage> {
       return Consumer<PocketBaseLibraryNotifier>(
         builder: (context, library, child) {
           if (library.notebooks.isEmpty) {
-            library.loadNotebooks();
+            library.loadNotebooks(auth.userId);
           }
-
-          List<RecordModel> sortedNotebooks = library.notebooks.values.toList();
-          sortedNotebooks.sort((a, b) => a
-              .getStringValue('name')
-              .toLowerCase()
-              .compareTo(b.getStringValue('name').toLowerCase()));
 
           return Scaffold(
             appBar: AppBar(
@@ -63,13 +55,12 @@ class _DashboardPageState extends State<DashboardPage> {
                 Expanded(
                   child: ListView.builder(
                     shrinkWrap: true, // Allow the list to shrink in height
-                    itemCount: library.notebooks.length,
+                    itemCount: library.sortedNotebooks.length,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        key: ValueKey(
-                            sortedNotebooks[index].getStringValue('id')),
+                        key: ValueKey(library.sortedNotebooks[index].id),
                         title: Text(
-                          sortedNotebooks[index].getStringValue('name'),
+                          library.sortedNotebooks[index].name,
                           overflow: TextOverflow.ellipsis,
                         ),
                         onTap: () {
@@ -77,7 +68,8 @@ class _DashboardPageState extends State<DashboardPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => NotebookPage(
-                                  notebookId: sortedNotebooks[index].id),
+                                  notebookId:
+                                      library.sortedNotebooks[index].id),
                             ),
                           );
                         },
@@ -119,7 +111,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                         ElevatedButton(
                           onPressed: () =>
-                              _createNotebook(library, auth.userid),
+                              _createNotebook(library, auth.userId),
                           child: Text('Create Notebook'),
                         ),
                       ],
