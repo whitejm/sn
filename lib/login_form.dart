@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sn/dashboard.dart';
 import 'package:sn/pocketbase_auth.dart';
 
 class LoginForm extends StatefulWidget {
@@ -45,6 +46,9 @@ class _LoginForm extends State<LoginForm> {
                 ),
                 const SizedBox(height: 20.0),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 158, 183, 58),
+                  ),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       print("calling sign in");
@@ -52,20 +56,23 @@ class _LoginForm extends State<LoginForm> {
                         _emailController.text,
                         _passwordController.text,
                       );
-                      Navigator.pushNamed(context, '/');
+                      // ignore: use_build_context_synchronously
+                      Navigator.popAndPushNamed(context, '/');
                     }
                   },
                   child: Text(auth.isLoading ? 'Loading...' : 'Login'),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/signup');
+                const SizedBox(height: 10),
+                InkWell(
+                  onTap: () {
+                    Navigator.popAndPushNamed(context, '/signup');
                   },
                   child: Text('Sign Up'),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/resetpassword');
+                const SizedBox(height: 10),
+                InkWell(
+                  onTap: () {
+                    Navigator.popAndPushNamed(context, '/resetpassword');
                   },
                   child: Text('Reset Password'),
                 ),

@@ -57,6 +57,9 @@ class _SignUpFormState extends State<SignUpForm> {
                 ),
                 const SizedBox(height: 20.0),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 158, 183, 58),
+                  ),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       try {
@@ -65,7 +68,7 @@ class _SignUpFormState extends State<SignUpForm> {
                           _passwordController.text,
                           _passwordController.text,
                         );
-                        Navigator.pushNamed(context, '/');
+                        Navigator.popAndPushNamed(context, '/');
                       } catch (error) {
                         print(auth.errorMessage);
                         print(error);
@@ -75,9 +78,10 @@ class _SignUpFormState extends State<SignUpForm> {
                   },
                   child: Text(auth!.isLoading ? 'Loading...' : 'Sign Up'),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/login');
+                const SizedBox(height: 10),
+                InkWell(
+                  onTap: () {
+                    Navigator.popAndPushNamed(context, '/login');
                   },
                   child: Text('Login'),
                 ),

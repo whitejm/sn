@@ -47,7 +47,19 @@ class _DashboardPageState extends State<DashboardPage> {
 
           return Scaffold(
             appBar: AppBar(
-              title: Text('Dashboard'),
+              title: Text('Notebooks'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () => _handleAddNotebook(),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  onPressed: () async {
+                    await auth.signOut();
+                  },
+                ),
+              ],
             ),
             body: Center(
                 child: Column(
@@ -83,14 +95,6 @@ class _DashboardPageState extends State<DashboardPage> {
                     },
                   ),
                 ),
-                ElevatedButton(
-                    onPressed: _handleAddNotebook, child: Text("Add Notebook")),
-                ElevatedButton(
-                  onPressed: () async {
-                    await auth.signOut();
-                  },
-                  child: Text("Logout"),
-                )
               ],
             )),
 

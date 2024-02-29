@@ -47,21 +47,21 @@ The folowing nested list is a description of the database tables.
   - created - datetime (automatically created by database)
 - notebooks (table)
   - id - text, primary key
-  - user_id - a references user(id)
+  - userId - a references user(id)
   - name - text
   - content - text
   - created - datetime (automatically created by database)
 - flashcards (table)
   - id - text, primary key
   - due - datetime
-  - user_id - a refrence to users(id)
-  - notebook_id - a reference to notebooks(id)
-  - question_sha512 - text
+  - userId - a refrence to users(id)
+  - notebookId - a reference to notebooks(id)
+  - sha512 - text (sha512 digest of the question's html )
   - created - datetime (automatically created by database)
 - reviews (table)
   - id - text, primary key
-  - user_id - a refrence to users(id)
-  - flashcard_id - a reference to flashcards(id)
+  - userId - a refrence to users(id)
+  - flashcardId - a reference to flashcards(id)
   - created - datetime (automatically created by database)
 
 For parsing flashcards from notebooks, the notebooks should be converted to html from markdown first, and then the flashcards should be parsed with the notebooks DOM. Trying to use regex to parse the flashcards directly from markdown would be fragile and overly complicted. For example, you would have to consider all the different valid ways nested blockqoutes can be written in markdown.
