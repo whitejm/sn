@@ -4,17 +4,17 @@ import 'package:provider/provider.dart';
 
 import 'package:sn/pocketbase_library.dart';
 
-class FlashcardNewView extends StatefulWidget {
+class FlashcardDueView extends StatefulWidget {
   final String notebookId;
 
-  const FlashcardNewView({Key? key, required this.notebookId})
+  const FlashcardDueView({Key? key, required this.notebookId})
       : super(key: key);
 
   @override
-  _FlashcardNewViewState createState() => _FlashcardNewViewState();
+  _FlashcardDueViewState createState() => _FlashcardDueViewState();
 }
 
-class _FlashcardNewViewState extends State<FlashcardNewView> {
+class _FlashcardDueViewState extends State<FlashcardDueView> {
   bool showAnswer = false;
   int flashcardIndex = 0;
   List<String> _flashcards = [];
@@ -52,13 +52,13 @@ class _FlashcardNewViewState extends State<FlashcardNewView> {
   Widget build(BuildContext context) {
     return Consumer<PocketBaseLibraryNotifier>(
         builder: (context, library, child) {
-      _flashcards = library.notebooks[widget.notebookId]?.newFlashcards ?? [];
+      _flashcards = library.notebooks[widget.notebookId]?.dueFlashcards ?? [];
       return Scaffold(
         appBar: AppBar(
             title: Text(
                 'Flashcards: ${library.notebooks[widget.notebookId]?.name}')),
         body: (_flashcards.isEmpty)
-            ? Center(child: Text("No New Flashcards"))
+            ? Center(child: Text("No Due Flashcards"))
             : Column(
                 children: [
                   Expanded(
@@ -102,6 +102,11 @@ class _FlashcardNewViewState extends State<FlashcardNewView> {
                       ]
                     ],
                   ),
+                  if (showAnswer) ...[
+                    Text(library.flashcards[_flashcards[flashcardIndex]]
+                            ?.reviewHistory ??
+                        "no review history found")
+                  ],
                   const SizedBox(
                     height: 20,
                   )

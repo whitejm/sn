@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sn/flashcards_all.dart';
+import 'package:sn/flashcards_due.dart';
 import 'package:sn/flashcards_new.dart';
 import 'package:sn/notebook.dart';
 import 'package:sn/pocketbase_auth.dart';
@@ -145,7 +146,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => FlashcardAllView(
+                                      builder: (context) => FlashcardDueView(
                                           notebookId: library
                                               .sortedNotebooks[index].id),
                                     ),

@@ -1,11 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart';
-import 'package:markdown/markdown.dart' as markdown;
 import 'package:crypto/crypto.dart';
-import 'package:html/parser.dart';
 import 'package:sn/qa_parser.dart';
+import 'package:intl/intl.dart';
 
 // RecordModel
 //  String id;
@@ -28,6 +26,7 @@ class Flashcard {
   String? id; // we get this from PB after flascards are parsed and push to PB
   final String sha512;
   String due;
+  String reviewHistory;
 
   Flashcard({
     required this.question,
@@ -36,6 +35,7 @@ class Flashcard {
     required this.sha512,
     this.id,
     this.due = "",
+    this.reviewHistory = "never reviewed before",
   });
 }
 
@@ -53,6 +53,8 @@ class Notebook {
     required this.name,
   });
 }
+
+DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss.SSSZZZZZ');
 
 // utility functions...
 
@@ -96,6 +98,7 @@ class PocketBaseLibraryNotifier extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get errorOccurred => _errorOccurred;
   String get errorMessage => _errorMessage;
+  String get userId => _userId;
   Map<String, Notebook> get notebooks => _notebooks;
   Map<String, Flashcard> get flashcards => _flashcards;
   List<Notebook> get sortedNotebooks {
@@ -256,33 +259,74 @@ class PocketBaseLibraryNotifier extends ChangeNotifier {
     final pbFlashcardsMap =
         recordModelListToMap(pbFlashcardsList, keyString: 'sha512');
     _notebooks[notebookId]?.newFlashcards = [];
-    _notebooks[notebookId]?.dueFlashcards = [];
-    for (var fc in _notebooks[notebookId]?.allFlashcards ?? []) {
+    List<Flashcard> dueFlashcards = [];
+    for (var fcSha in _notebooks[notebookId]?.allFlashcards ?? []) {
       // handle flashcards already in PB
-      if (pbFlashcardsMap.containsKey(fc)) {
-        _flashcards[fc]!.due = pbFlashcardsMap[fc]?.getStringValue('due') ?? "";
+      if (pbFlashcardsMap.containsKey(fcSha)) {
+        _flashcards[fcSha]!.due =
+            pbFlashcardsMap[fcSha]?.getStringValue('due') ?? "";
+        _flashcards[fcSha]!.id = pbFlashcardsMap[fcSha]!.id;
+        _flashcards[fcSha]!.reviewHistory = await getReviewHistory(fcSha);
       }
       // handle flashcards from notebook not in PB yet
       else {
         try {
           final record = await pb.collection('flashcards').create(body: {
-            'sha512': fc,
+            'sha512': fcSha,
             'notebookId': notebookId,
             'userId': _userId
           });
-          _flashcards[fc]!.id = record.id;
+          _flashcards[fcSha]!.id = record.id;
         } catch (error) {
           debugPrint(error.toString());
         }
       }
       // New Flashcards
 
-      if (_flashcards[fc]?.due.isEmpty ?? true) {
-        _notebooks[notebookId]?.newFlashcards.add(fc);
+      if (_flashcards[fcSha]?.due.isEmpty ?? true) {
+        _notebooks[notebookId]?.newFlashcards.add(fcSha);
+      } else {
+        // Due flashcards
+        DateTime dueDateTime = formatter.parse(_flashcards[fcSha]!.due, true);
+        DateTime nowDateTime = DateTime.now();
+        if (dueDateTime.isBefore(nowDateTime)) {
+          dueFlashcards.add(_flashcards[fcSha]!);
+          _notebooks[notebookId]!.dueFlashcards.add(fcSha);
+        }
       }
-
-      //TODO Due flashcards
     }
+    // Due flashcards continued
+    dueFlashcards.sort((a, b) =>
+        formatter.parse(a.due, true).compareTo(formatter.parse(b.due, true)));
+    notebooks[notebookId]!.dueFlashcards =
+        dueFlashcards.map((fc) => fc.sha512).toList();
     notifyListeners();
+  }
+
+  void setDueDate(String fcSha, int days) async {
+    // TODO, try/catch error handling, check for id...
+
+    DateTime dueDateTime = DateTime.now().toUtc().add(Duration(days: days));
+    String due = formatter.format(dueDateTime);
+    String id = _flashcards[fcSha]?.id ?? "";
+    debugPrint(
+        'setDueDate flashcardId: $id sha: $fcSha dateTime: $due days: $days');
+    await pb.collection('flashcards').update(id, body: {'due': due});
+    // add review history
+    await pb.collection('reviews').create(
+        body: {'flashcardId': _flashcards[fcSha]?.id ?? "", 'userId': _userId});
+    // TODO: could just update notebooks.dueFlashcards directly and call notifylisteners to save a call to backend
+    syncNotebookFlashcards(_flashcards[fcSha]!.notebookId);
+  }
+
+  Future<String> getReviewHistory(String fcSha) async {
+    // TODO try catch error handling
+    var reviews = await pb.collection('reviews').getFullList(
+        filter: 'flashcardId="${_flashcards[fcSha]!.id}"', sort: "-created");
+    if (reviews.length > 0) {
+      return "You have reviewd this ${reviews.length} times. Last review was ${reviews[0].created}";
+    } else {
+      return "No review history found";
+    }
   }
 }

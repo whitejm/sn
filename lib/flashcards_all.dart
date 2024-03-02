@@ -46,13 +46,12 @@ class _FlashcardAllViewState extends State<FlashcardAllView> {
     return Consumer<PocketBaseLibraryNotifier>(
         builder: (context, library, child) {
       _flashcards = library.notebooks[widget.notebookId]?.allFlashcards ?? [];
-      debugPrint(library.flashcards[_flashcards[flashcardIndex]]!.question);
       return Scaffold(
         appBar: AppBar(
             title: Text(
                 'Flashcards for ${library.notebooks[widget.notebookId]?.name}')),
         body: (_flashcards.isEmpty)
-            ? Center(child: CircularProgressIndicator())
+            ? Center(child: Text("No Flashcards"))
             : Column(
                 children: [
                   Expanded(
