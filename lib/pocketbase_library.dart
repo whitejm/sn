@@ -250,31 +250,38 @@ class PocketBaseLibraryNotifier extends ChangeNotifier {
     debugPrint(
         'syncNotebookFlashcards: notebookId $notebookId (${_notebooks[notebookId]?.name})');
     // TODO: try/catch, error handling
-    final pbFlashcardsList = await pb
-        .collection('flashcards')
-        .getFullList(); //filter: 'notebookId = ${notebookId}'
+    final pbFlashcardsList = await pb.collection('flashcards').getFullList(
+        filter:
+            'notebookId="$notebookId"'); //filter: 'notebookId = ${notebookId}'
     final pbFlashcardsMap =
         recordModelListToMap(pbFlashcardsList, keyString: 'sha512');
-    for (var fc in _flashcards.values) {
+    _notebooks[notebookId]?.newFlashcards = [];
+    _notebooks[notebookId]?.dueFlashcards = [];
+    for (var fc in _notebooks[notebookId]?.allFlashcards ?? []) {
       // handle flashcards already in PB
-      if (pbFlashcardsMap.containsKey(fc.sha512)) {
-        _flashcards[fc.sha512]!.due =
-            pbFlashcardsMap[fc.sha512]?.getStringValue('due') ?? "";
+      if (pbFlashcardsMap.containsKey(fc)) {
+        _flashcards[fc]!.due = pbFlashcardsMap[fc]?.getStringValue('due') ?? "";
       }
       // handle flashcards from notebook not in PB yet
-      else if (fc.notebookId == notebookId) {
+      else {
         try {
-          debugPrint('adding flashcard with notebookId of ${fc.notebookId}');
           final record = await pb.collection('flashcards').create(body: {
-            'sha512': fc.sha512,
-            'notebookId': fc.notebookId,
+            'sha512': fc,
+            'notebookId': notebookId,
             'userId': _userId
           });
-          _flashcards[fc.sha512]!.id = record.id;
+          _flashcards[fc]!.id = record.id;
         } catch (error) {
           debugPrint(error.toString());
         }
       }
+      // New Flashcards
+
+      if (_flashcards[fc]?.due.isEmpty ?? true) {
+        _notebooks[notebookId]?.newFlashcards.add(fc);
+      }
+
+      //TODO Due flashcards
     }
     notifyListeners();
   }
