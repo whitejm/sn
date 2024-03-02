@@ -3,8 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:markdown/markdown.dart' as markdown;
-import 'package:html/parser.dart';
 import 'package:crypto/crypto.dart';
+import 'package:html/parser.dart';
+import 'package:sn/qa_parser.dart';
 
 // RecordModel
 //  String id;
@@ -42,9 +43,10 @@ class Notebook {
   final String id;
   final String name;
   final String content;
-  List<Flashcard> flashcards =
-      []; // flashcards are added after contents are parsed
-
+  // flashcard lists contain flashcards sha512(key) not the Flashcards themselves
+  List<String> allFlashcards = [];
+  List<String> newFlashcards = [];
+  List<String> dueFlashcards = [];
   Notebook({
     required this.id,
     required this.content,
@@ -95,6 +97,7 @@ class PocketBaseLibraryNotifier extends ChangeNotifier {
   bool get errorOccurred => _errorOccurred;
   String get errorMessage => _errorMessage;
   Map<String, Notebook> get notebooks => _notebooks;
+  Map<String, Flashcard> get flashcards => _flashcards;
   List<Notebook> get sortedNotebooks {
     List<Notebook> _sortedNotebooks = _notebooks.values.toList();
     _sortedNotebooks
@@ -205,32 +208,25 @@ class PocketBaseLibraryNotifier extends ChangeNotifier {
 
   void parseFlashcardsFromNotebook(String notebookId) {
     debugPrint('parseFlashcardsFromNotebook notebookId: $notebookId');
-    // Step 1: Markdown to HTML conversion
-    String html =
-        markdown.markdownToHtml(_notebooks[notebookId]?.content ?? "");
 
-    // Step 2: DOM parsing
-    var document = parse(html);
-    var allBlockquotes = document.querySelectorAll('blockquote');
+    _notebooks[notebookId]?.allFlashcards = [];
+
+    List<QA> qas = parseQAsFromMD(_notebooks[notebookId]?.content ?? "");
 
     // Step 3: Flashcard extraction
-    for (var bq in allBlockquotes) {
-      var nestedBlockquote = bq.querySelector('blockquote');
-      if (nestedBlockquote != null) {
-        bq.querySelector('blockquote')?.remove();
-        final question = bq.text.trim();
-        final answer = nestedBlockquote.text.trim();
-        // TODO: get pocketbase to take long id or do something better
-        final sha =
-            sha512.convert(utf8.encode(question)).toString().substring(0, 15);
-        final flashcard = Flashcard(
-            sha512: sha,
-            question: question,
-            answer: answer,
-            notebookId: notebookId);
-        _flashcards.update(sha, (value) => flashcard,
-            ifAbsent: () => flashcard);
-      }
+    for (var qa in qas) {
+      final question = qa.question;
+      final answer = qa.answer;
+      // TODO: get pocketbase to take long id or do something better
+      final sha =
+          sha512.convert(utf8.encode(question)).toString().substring(0, 15);
+      final flashcard = Flashcard(
+          sha512: sha,
+          question: question,
+          answer: answer,
+          notebookId: notebookId);
+      _flashcards.update(sha, (value) => flashcard, ifAbsent: () => flashcard);
+      _notebooks[notebookId]?.allFlashcards.add(sha);
     }
   }
 

@@ -64,11 +64,14 @@ The folowing nested list is a description of the database tables.
   - flashcardId - a reference to flashcards(id)
   - created - datetime (automatically created by database)
 
-For parsing flashcards from notebooks, the notebooks should be converted to html from markdown first, and then the flashcards should be parsed with the notebooks DOM. Trying to use regex to parse the flashcards directly from markdown would be fragile and overly complicted. For example, you would have to consider all the different valid ways nested blockqoutes can be written in markdown.
-
 The flashcard's question, after being parsed, will be hash summed so they can be identified the next time the notebook is edited. If a user modifies a flashcard's question inside a notebook it will be considered a different flashcard.
 
 If a flashcard's "due" field is empty it will be considered "new." If a flashcards "due" field has a datetime in the past it will be considered "Due." If it is in the future it will be considerd "not due" and "not new."
+
+Flashcard Parsing: 
+
+I need to parse flashcards (question and answer pairs) out of the markdown files. In the future I might use one of flutters markdown packages for parsing flashcards, but their documentation is poor. So for now we need to write a parsing function that keeps the contents of the question and answer in markdown. 
+
 
 In the main dashboard/library each noteobook ListTile should have three flashcard buttons. All (Green), New (Blue), and Due (Red). "All" is all flashcards in the notebook, wether they are new, due, or not new and not due. "New" are flashcards that have had no due date set in the flaschards table. The buttons should use the "quiz" icon and with a colored badge. If a notebook has 20 total flashcards the "All" quiz icon button should have a green badge with the number 20 in it. If the notebook as 3 new flashcards the "New" quiz icon button should have a blue badge with the number 3 in it. If the notebook has 5 due flashcards the "Due" quiz icon button should have a red badge with the number 5 in it. If there are no flashcards in a notebook the All button should be disabled. If there are no new flashcards in the notebook the new button should be disabled. If there are no due flashcards in the notebook the due button should be disabled.
 
@@ -76,3 +79,40 @@ After a user has viewed a flashcard they can set the 'due' datetime to now, a us
  
 The repos is located here... `https://github.com/whitejm/sn`
 
+Flashcards (question answer pairs) are made with blockquotes. The question is in the first level blockquote and the answer is in the nested blockquote.
+ 
+```md
+
+> this is a question
+> > this is an answer
+
+> this is not a question or answer because there is no nested 
+
+> > this is not an answer because there is no content in first level blockquote
+
+```
+
+
+```dart
+class QA {
+  final String question;
+  final String answer;
+
+  // Constructor to initialize question and answer
+  QA({required this.question, required this.answer});
+}
+
+List<QA> parseNotebook(String md) {
+  String potentialQ;
+  String potentialA;
+  List<QA> qas = [];
+  bool blockQuote = false;
+  bool nestedBlockQoute = false;
+  bool codeFence = false;
+
+  // loop through each line in md and get QAs 
+
+}
+```
+
+Please help me finish the parseNotebook function. blockquotes inside code fences should be ignored. https://spec.commonmark.org/0.31.2/ has rules on blockquotes and code fences.
