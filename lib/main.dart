@@ -11,8 +11,8 @@ import 'login_form.dart';
 import 'password_reset_form.dart';
 import 'sign_up_form.dart';
 
-final pb = PocketBase('http://127.0.0.1:8090');
-
+//final pb = PocketBase('http://127.0.0.1:8090');
+final pb = PocketBase('https://subnotes.pockethost.io/');
 void main() {
   runApp(MultiProvider(
     providers: [
