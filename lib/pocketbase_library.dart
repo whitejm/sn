@@ -320,13 +320,32 @@ class PocketBaseLibraryNotifier extends ChangeNotifier {
   }
 
   Future<String> getReviewHistory(String fcSha) async {
-    // TODO try catch error handling
-    var reviews = await pb.collection('reviews').getFullList(
-        filter: 'flashcardId="${_flashcards[fcSha]!.id}"', sort: "-created");
-    if (reviews.length > 0) {
-      return "You have reviewd this ${reviews.length} times. Last review was ${reviews[0].created}";
-    } else {
-      return "No review history found";
+    try {
+      // Error handling
+      var reviews = await pb.collection('reviews').getFullList(
+          filter: 'flashcardId="${_flashcards[fcSha]!.id}"', sort: "-created");
+
+      if (reviews.length > 0) {
+        // Convert the created time to a DateTime object
+        DateTime lastReviewDate = DateTime.parse(reviews[0].created);
+
+        // Calculate the difference between now and the last review
+        Duration difference = DateTime.now().difference(lastReviewDate);
+
+        // Determine the correct output based on the difference
+        if (difference.inDays == 0) {
+          return "You have reviewed this ${reviews.length} times. Last reviewed today";
+        } else if (difference.inDays == 1) {
+          return "You have reviewed this ${reviews.length} times. Last reviewed yesterday";
+        } else {
+          return "You have reviewed this ${reviews.length} times. Last reviewed ${difference.inDays} days ago";
+        }
+      } else {
+        return "No review history found";
+      }
+    } catch (error) {
+      // Handle errors appropriately
+      return "Error fetching review history";
     }
   }
 }
