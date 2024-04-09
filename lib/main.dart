@@ -3,16 +3,16 @@ import 'package:pocketbase/pocketbase.dart';
 import 'package:provider/provider.dart';
 import 'package:sn/auth_gaurd.dart';
 import 'package:sn/dashboard.dart';
-import 'package:sn/notebook.dart';
 import 'package:sn/pocketbase_auth.dart';
 import 'package:sn/pocketbase_library.dart';
-
 import 'login_form.dart';
 import 'password_reset_form.dart';
 import 'sign_up_form.dart';
 
-//final pb = PocketBase('http://127.0.0.1:8090');
-final pb = PocketBase('https://subnotes.pockethost.io/');
+const String pocketbaseURL =
+    String.fromEnvironment('POCKETBASE') ?? 'http://127.0.0.1:8090';
+final pb = PocketBase(pocketbaseURL);
+
 void main() {
   runApp(MultiProvider(
     providers: [
