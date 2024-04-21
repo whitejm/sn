@@ -9,11 +9,13 @@ import 'login_form.dart';
 import 'password_reset_form.dart';
 import 'sign_up_form.dart';
 
-const String pocketbaseURL =
-    String.fromEnvironment('POCKETBASE') ?? 'http://127.0.0.1:8090';
-final pb = PocketBase(pocketbaseURL);
-
 void main() {
+  String pb_url = 'http://127.0.0.1:8090';
+  const hasEnv = bool.hasEnvironment('POCKETBASE');
+  if (hasEnv) {
+    pb_url = String.fromEnvironment('POCKETBASE');
+  }
+  final pb = PocketBase(pb_url);
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => PocketBaseAuthNotifier(pb)),
