@@ -96,55 +96,61 @@ class _NotebookEditPageState extends State<NotebookEditPage> {
   Widget build(BuildContext context) {
     return Consumer<PocketBaseLibraryNotifier>(
       builder: (context, library, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Edit Notebook'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () => _showDeleteDialog(context),
+        return Center(
+          child: Container(
+            width: 800,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('Edit Notebook'),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () => _showDeleteDialog(context),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      await library.updateNotebook(widget.notebookId,
+                          _nameController.text, _contentController.text);
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.save),
+                  ),
+                ],
               ),
-              IconButton(
-                onPressed: () async {
-                  await library.updateNotebook(widget.notebookId,
-                      _nameController.text, _contentController.text);
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.save),
-              ),
-            ],
-          ),
-          body: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : library.errorOccurred
-                  ? Center(child: Text(library.errorMessage))
-                  : Form(
-                      key: _formKey,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              controller: _nameController,
-                              decoration: const InputDecoration(
-                                  labelText: 'Notebook Name'),
-                              validator: (value) =>
-                                  value!.isEmpty ? 'Please enter a name' : null,
+              body: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : library.errorOccurred
+                      ? Center(child: Text(library.errorMessage))
+                      : Form(
+                          key: _formKey,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              children: [
+                                TextFormField(
+                                  controller: _nameController,
+                                  decoration: const InputDecoration(
+                                      labelText: 'Notebook Name'),
+                                  validator: (value) => value!.isEmpty
+                                      ? 'Please enter a name'
+                                      : null,
+                                ),
+                                const SizedBox(height: 20.0),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _contentController,
+                                    decoration: const InputDecoration(
+                                        labelText: 'Notebook Content'),
+                                    maxLines: null, // Make it multiline
+                                    keyboardType: TextInputType.multiline,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 20.0),
-                            Expanded(
-                              child: TextFormField(
-                                controller: _contentController,
-                                decoration: const InputDecoration(
-                                    labelText: 'Notebook Content'),
-                                maxLines: null, // Make it multiline
-                                keyboardType: TextInputType.multiline,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
+            ),
+          ),
         );
       },
     );
