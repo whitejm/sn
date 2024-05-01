@@ -13,30 +13,35 @@ class NotebookPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<PocketBaseLibraryNotifier>(
         builder: (context, library, child) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(library.notebooks[notebookId]?.name ?? 'Notebook'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        NotebookEditPage(notebookId: notebookId),
-                  ),
-                );
-              },
+      return Center(
+        child: Container(
+          width: 800.0,
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(library.notebooks[notebookId]?.name ?? 'Notebook'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            NotebookEditPage(notebookId: notebookId),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
+            body: library.notebooks[notebookId]?.content != null &&
+                    library.notebooks[notebookId]?.content != ""
+                ? Markdown(data: library.notebooks[notebookId]!.content)
+                : const Center(
+                    child: Text('Notebook is empty'),
+                  ),
+          ),
         ),
-        body: library.notebooks[notebookId]?.content != null &&
-                library.notebooks[notebookId]?.content != ""
-            ? Markdown(data: library.notebooks[notebookId]!.content)
-            : const Center(
-                child: Text('Notebook is empty'),
-              ),
       );
     });
   }
