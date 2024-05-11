@@ -53,65 +53,72 @@ class _FlashcardDueViewState extends State<FlashcardDueView> {
     return Consumer<PocketBaseLibraryNotifier>(
         builder: (context, library, child) {
       _flashcards = library.notebooks[widget.notebookId]?.dueFlashcards ?? [];
-      return Scaffold(
-        appBar: AppBar(
-            title: Text(
-                'Flashcards: ${library.notebooks[widget.notebookId]?.name}')),
-        body: (_flashcards.isEmpty)
-            ? Center(child: Text("No Due Flashcards"))
-            : Column(
-                children: [
-                  Expanded(
-                    child: Markdown(
-                        data: showAnswer
-                            ? library
-                                .flashcards[_flashcards[flashcardIndex]]!.answer
-                            : library.flashcards[_flashcards[flashcardIndex]]!
-                                .question),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      return Center(
+        child: Container(
+          width: 800,
+          child: Scaffold(
+            appBar: AppBar(
+                title: Text(
+                    'Flashcards: ${library.notebooks[widget.notebookId]?.name}')),
+            body: (_flashcards.isEmpty)
+                ? Center(child: Text("No Due Flashcards"))
+                : Column(
                     children: [
-                      if (!showAnswer) ...[
-                        IconButton(
-                            onPressed: _handlePrevFlashcard,
-                            icon: Icon(Icons.arrow_back)),
-                        ElevatedButton(
-                          onPressed: () =>
-                              setState(() => showAnswer = !showAnswer),
-                          child:
-                              Text(showAnswer ? 'Hide Answer' : 'Show Answer'),
-                        ),
-                        IconButton(
-                            onPressed: _handleNextFlashcard,
-                            icon: Icon(Icons.arrow_forward)),
-                      ],
+                      Expanded(
+                        child: Markdown(
+                            data: showAnswer
+                                ? library
+                                    .flashcards[_flashcards[flashcardIndex]]!
+                                    .answer
+                                : library
+                                    .flashcards[_flashcards[flashcardIndex]]!
+                                    .question),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          if (!showAnswer) ...[
+                            IconButton(
+                                onPressed: _handlePrevFlashcard,
+                                icon: Icon(Icons.arrow_back)),
+                            ElevatedButton(
+                              onPressed: () =>
+                                  setState(() => showAnswer = !showAnswer),
+                              child: Text(
+                                  showAnswer ? 'Hide Answer' : 'Show Answer'),
+                            ),
+                            IconButton(
+                                onPressed: _handleNextFlashcard,
+                                icon: Icon(Icons.arrow_forward)),
+                          ],
+                          if (showAnswer) ...[
+                            ElevatedButton(
+                                onPressed: () => _handleDue(0, library),
+                                child: Text('Now')),
+                            ElevatedButton(
+                                onPressed: () => _handleDue(1, library),
+                                child: Text('Day')),
+                            ElevatedButton(
+                                onPressed: () => _handleDue(7, library),
+                                child: Text('Week')),
+                            ElevatedButton(
+                                onPressed: () => _handleDue(30, library),
+                                child: Text('Month')),
+                          ]
+                        ],
+                      ),
                       if (showAnswer) ...[
-                        ElevatedButton(
-                            onPressed: () => _handleDue(0, library),
-                            child: Text('Now')),
-                        ElevatedButton(
-                            onPressed: () => _handleDue(1, library),
-                            child: Text('Day')),
-                        ElevatedButton(
-                            onPressed: () => _handleDue(7, library),
-                            child: Text('Week')),
-                        ElevatedButton(
-                            onPressed: () => _handleDue(30, library),
-                            child: Text('Month')),
-                      ]
+                        Text(library.flashcards[_flashcards[flashcardIndex]]
+                                ?.reviewHistory ??
+                            "no review history found")
+                      ],
+                      const SizedBox(
+                        height: 20,
+                      )
                     ],
                   ),
-                  if (showAnswer) ...[
-                    Text(library.flashcards[_flashcards[flashcardIndex]]
-                            ?.reviewHistory ??
-                        "no review history found")
-                  ],
-                  const SizedBox(
-                    height: 20,
-                  )
-                ],
-              ),
+          ),
+        ),
       );
     });
   }

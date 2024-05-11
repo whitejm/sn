@@ -46,43 +46,51 @@ class _FlashcardAllViewState extends State<FlashcardAllView> {
     return Consumer<PocketBaseLibraryNotifier>(
         builder: (context, library, child) {
       _flashcards = library.notebooks[widget.notebookId]?.allFlashcards ?? [];
-      return Scaffold(
-        appBar: AppBar(
-            title: Text(
-                'Flashcards for ${library.notebooks[widget.notebookId]?.name}')),
-        body: (_flashcards.isEmpty)
-            ? Center(child: Text("No Flashcards"))
-            : Column(
-                children: [
-                  Expanded(
-                    child: Markdown(
-                        data: showAnswer
-                            ? library
-                                .flashcards[_flashcards[flashcardIndex]]!.answer
-                            : library.flashcards[_flashcards[flashcardIndex]]!
-                                .question),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      return Center(
+        child: Container(
+          width: 800,
+          child: Scaffold(
+            appBar: AppBar(
+                title: Text(
+                    'Flashcards for ${library.notebooks[widget.notebookId]?.name}')),
+            body: (_flashcards.isEmpty)
+                ? Center(child: Text("No Flashcards"))
+                : Column(
                     children: [
-                      IconButton(
-                          onPressed: _handlePrevFlashcard,
-                          icon: Icon(Icons.arrow_back)),
-                      ElevatedButton(
-                        onPressed: () =>
-                            setState(() => showAnswer = !showAnswer),
-                        child: Text(showAnswer ? 'Hide Answer' : 'Show Answer'),
+                      Expanded(
+                        child: Markdown(
+                            data: showAnswer
+                                ? library
+                                    .flashcards[_flashcards[flashcardIndex]]!
+                                    .answer
+                                : library
+                                    .flashcards[_flashcards[flashcardIndex]]!
+                                    .question),
                       ),
-                      IconButton(
-                          onPressed: _handleNextFlashcard,
-                          icon: Icon(Icons.arrow_forward)),
-                      const SizedBox(
-                        height: 10,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          IconButton(
+                              onPressed: _handlePrevFlashcard,
+                              icon: Icon(Icons.arrow_back)),
+                          ElevatedButton(
+                            onPressed: () =>
+                                setState(() => showAnswer = !showAnswer),
+                            child: Text(
+                                showAnswer ? 'Hide Answer' : 'Show Answer'),
+                          ),
+                          IconButton(
+                              onPressed: _handleNextFlashcard,
+                              icon: Icon(Icons.arrow_forward)),
+                          const SizedBox(
+                            height: 10,
+                          )
+                        ],
                       )
                     ],
-                  )
-                ],
-              ),
+                  ),
+          ),
+        ),
       );
     });
   }
