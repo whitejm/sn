@@ -39,6 +39,7 @@ class _LoginForm extends State<LoginForm> {
                           ),
                           validator: (value) =>
                               value!.isEmpty ? 'Please enter your email' : null,
+                          autofillHints: [AutofillHints.username],
                         ),
                         const SizedBox(height: 20.0),
                         TextFormField(
@@ -50,6 +51,7 @@ class _LoginForm extends State<LoginForm> {
                           validator: (value) => value!.isEmpty
                               ? 'Please enter your password'
                               : null,
+                          autofillHints: [AutofillHints.password],
                         ),
                         const SizedBox(height: 20.0),
                         ElevatedButton(
