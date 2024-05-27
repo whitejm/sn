@@ -2,11 +2,3 @@
 package = "netlify-plugin-flutter"
    [plugins.inputs]
     channel = "stable"
-[build]
-command = "flutter build web --release"
-publish = "build/web"
-
-[[redirects]]
-  from = "assets/*"
-  to = "/assets/:splat"
-  status = 200
