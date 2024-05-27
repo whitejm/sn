@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:provider/provider.dart';
@@ -9,17 +10,17 @@ import 'login_form.dart';
 import 'password_reset_form.dart';
 import 'sign_up_form.dart';
 
-void main() {
-  String pb_url = 'http://127.0.0.1:8090';
-  const hasEnv = bool.hasEnvironment('POCKETBASE');
-  if (hasEnv) {
-    pb_url = String.fromEnvironment('POCKETBASE');
-  }
-  final pb = PocketBase(pb_url);
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
+
+  String pbUrl = dotenv.get('POCKETBASE', fallback: 'http://127.0.0.1:8090');
+  final pb = PocketBase(pbUrl);
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => PocketBaseAuthNotifier(pb)),
-      ChangeNotifierProvider(create: (context) => PocketBaseLibraryNotifier(pb))
+      ChangeNotifierProvider(
+          create: (context) => PocketBaseLibraryNotifier(pb)),
     ],
     child: App(),
   ));
